@@ -56,6 +56,18 @@ def main() -> int:
     with open(path, ENTRY_MODE, encoding="utf-8", newline="") as fh:
         fh.write(text)
     os.chmod(path, 0o644)
+    # Read back and verify: a partial write would silently change the
+    # judged sentence, so confirm the file on disk is exactly the
+    # intended text before reporting success.
+    with open(path, "r", encoding="utf-8", newline="") as fh:
+        written = fh.read()
+    if written != text:
+        print(
+            "entry.txt mismatch after write: expected %d characters, "
+            "got %d" % (len(text), len(written)),
+            file=sys.stderr,
+        )
+        return 1
     return 0
 
 
